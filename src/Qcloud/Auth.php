@@ -1,114 +1,87 @@
 <?php
 
-namespace Freyo\LaravelQcloudCosV3\Qcloud;
+/**
+ * Signature create related functions for authenticating with cos system.
+ */
 
-class Auth
-{
-    const AUTH_URL_FORMAT_ERROR = -1;
-    const AUTH_SECRET_ID_KEY_ERROR = -2;
+namespace Tinpont\LaravelQcloudCosV4\Qcloud;
+
+/**
+ * Auth class for creating reusable or nonreusable signature.
+ */
+class Auth {
+    // Secret id or secret key is not valid.
+    const AUTH_SECRET_ID_KEY_ERROR = -1;
 
     /**
-     * 生成多次有效签名函数（用于上传和下载资源，有效期内可重复对不同资源使用）.
-     *
-     * @param int    $expired    过期时间,unix时间戳
-     * @param string $bucketName 文件所在bucket
-     *
-     * @return string 签名
+     * Create reusable signature for listDirectory in $bucket or uploadFile into $bucket.
+     * If $filepath is not null, this signature will be binded with this $filepath.
+     * This signature will expire at $expiration timestamp.
+     * Return the signature on success.
+     * Return error code if parameter is not valid.
      */
-    public static function appSign($expired, $bucketName)
-    {
+    public static function createReusableSignature($expiration, $bucket, $filepath = null) {
         $appId = Conf::getAppId();
         $secretId = Conf::getSecretId();
         $secretKey = Conf::getSecretKey();
 
-        if (empty($secretId) || empty($secretKey) || empty($appId)) {
+        if (empty($appId) || empty($secretId) || empty($secretKey)) {
             return self::AUTH_SECRET_ID_KEY_ERROR;
         }
 
-        return self::appSignBase($appId, $secretId, $secretKey, $expired, null, $bucketName);
+        if (empty($filepath)) {
+            return self::createSignature($appId, $secretId, $secretKey, $expiration, $bucket, null);
+        } else {
+            if (preg_match('/^\//', $filepath) == 0) {
+                $filepath = '/' . $filepath;
+            }
+
+            return self::createSignature($appId, $secretId, $secretKey, $expiration, $bucket, $filepath);
+        }
     }
 
     /**
-     * 生成单次有效签名函数（用于删除和更新指定fileId资源，使用一次即失效）.
-     *
-     * @param string $fileId     文件路径，以 /{$appId}/{$bucketName} 开头
-     * @param string $bucketName 文件所在bucket
-     *
-     * @return string 签名
+     * Create nonreusable signature for delete $filepath in $bucket.
+     * This signature will expire after single usage.
+     * Return the signature on success.
+     * Return error code if parameter is not valid.
      */
-    public static function appSign_once($path, $bucketName)
-    {
+    public static function createNonreusableSignature($bucket, $filepath) {
         $appId = Conf::getAppId();
         $secretId = Conf::getSecretId();
         $secretKey = Conf::getSecretKey();
 
-        if (preg_match('/^\//', $path) == 0) {
-            $path = '/'.$path;
-        }
-        $fileId = '/'.$appId.'/'.$bucketName.$path;
-
-        if (empty($secretId) || empty($secretKey) || empty($appId)) {
+        if (empty($appId) || empty($secretId) || empty($secretKey)) {
             return self::AUTH_SECRET_ID_KEY_ERROR;
         }
 
-        return self::appSignBase($appId, $secretId, $secretKey, 0, $fileId, $bucketName);
+        if (preg_match('/^\//', $filepath) == 0) {
+            $filepath = '/' . $filepath;
+        }
+        $fileId = '/' . $appId . '/' . $bucket . $filepath;
+
+        return self::createSignature($appId, $secretId, $secretKey, 0, $bucket, $fileId);
     }
 
     /**
-     * 生成绑定资源的多次有效签名.
-     *
-     * @param string $path       文件相对bucket的路径 /test/test.log 标识该bucket下test目录下的test.log文件
-     * @param string $bucketName bucket
-     * @param int    $expired    过期时间，unix时间戳
-     *
-     * @return string 签名串
+     * A helper function for creating signature.
+     * Return the signature on success.
+     * Return error code if parameter is not valid.
      */
-    public static function appSign_multiple($path, $bucketName, $expired)
-    {
-        $appId = Conf::getAppId();
-        $secretId = Conf::getSecretId();
-        $secretKey = Conf::getSecretKey();
-
-        if (preg_match('/^\//', $path) == 0) {
-            $path = '/'.$path;
-        }
-        $fileId = $path;
-
-        if (empty($secretId) || empty($secretKey) || empty($appId)) {
-            return self::AUTH_SECRET_ID_KEY_ERROR;
-        }
-
-        return self::appSignBase($appId, $secretId, $secretKey, $expired, $fileId, $bucketName);
-    }
-
-    /**
-     * 签名函数（上传、下载会生成多次有效签名，删除资源会生成单次有效签名）.
-     *
-     * @param string $appId
-     * @param string $secretId
-     * @param string $secretKey
-     * @param int    $expired    过期时间,unix时间戳
-     * @param string $fileId     文件路径，以 /{$appId}/{$bucketName} 开头
-     * @param string $bucketName 文件所在bucket
-     *
-     * @return string 签名
-     */
-    private static function appSignBase($appId, $secretId, $secretKey, $expired, $fileId, $bucketName)
-    {
+    private static function createSignature(
+        $appId, $secretId, $secretKey, $expiration, $bucket, $fileId) {
         if (empty($secretId) || empty($secretKey)) {
             return self::AUTH_SECRET_ID_KEY_ERROR;
         }
 
         $now = time();
-        $rdm = rand();
-        $plainText = "a=$appId&k=$secretId&e=$expired&t=$now&r=$rdm&f=$fileId&b=$bucketName";
+        $random = rand();
+        $plainText = "a=$appId&k=$secretId&e=$expiration&t=$now&r=$random&f=$fileId&b=$bucket";
         $bin = hash_hmac('SHA1', $plainText, $secretKey, true);
         $bin = $bin.$plainText;
 
-        $sign = base64_encode($bin);
+        $signature = base64_encode($bin);
 
-        return $sign;
+        return $signature;
     }
 }
-
-//end of script

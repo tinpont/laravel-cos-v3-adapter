@@ -1,10 +1,10 @@
 <?php
 
-namespace Freyo\LaravelQcloudCosV3;
+namespace Tinpont\LaravelQcloudCosV4;
 
-use Freyo\LaravelQcloudCosV3\Plugins\GetUrl;
-use Freyo\LaravelQcloudCosV3\Plugins\PutRemoteFile;
-use Freyo\LaravelQcloudCosV3\Plugins\PutRemoteFileAs;
+use Tinpont\LaravelQcloudCosV4\Plugins\GetUrl;
+use Tinpont\LaravelQcloudCosV4\Plugins\PutRemoteFile;
+use Tinpont\LaravelQcloudCosV4\Plugins\PutRemoteFileAs;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use League\Flysystem\Filesystem;
@@ -25,11 +25,11 @@ class ServiceProvider extends LaravelServiceProvider
             __DIR__.'/filesystems.php' => config_path('filesystems.php'),
         ]);
 
-        Storage::extend('cosv3', function ($app, $config) {
+        Storage::extend('cosv4', function ($app, $config) {
             return new Filesystem(new Adapter($config));
         });
 
-        Storage::disk('cosv3')
+        Storage::disk('cosv4')
                ->addPlugin(new PutRemoteFile())
                ->addPlugin(new PutRemoteFileAs())
                ->addPlugin(new GetUrl());

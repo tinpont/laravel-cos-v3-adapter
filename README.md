@@ -1,13 +1,13 @@
-# laravel-cos-v3-adapter
+# laravel-cos-v4-adapter
 
-Tencent Qcloud COS V3 Adapter for Laravel
+Tencent Qcloud COS V4 Adapter for Laravel
 
-腾讯云COS对象存储V3 for Laravel 5
+腾讯云COS对象存储V4 for Laravel 5
 
 ## 安装
 
   ```shell
-  composer require "freyo/laravel-cos-v3-adapter"
+  composer require "tinpont/laravel-cos-v4-adapter"
   ```
 
 ## 配置
@@ -15,22 +15,23 @@ Tencent Qcloud COS V3 Adapter for Laravel
 1. 在 `config/app.php` 中注册 `ServiceProvider`:
 
   ```php
-  Freyo\LaravelQcloudCosV3\ServiceProvider::class,
+  Tinpont\LaravelQcloudCosV4\ServiceProvider::class,
   ```
 
 2. 在 `config/filesystems.php` 中配置:
 
   ```php
-  'disks'=>[
-      'cosv3' => [
-          'driver' => 'cosv3',
-          'protocol' => env('COSV3_PROTOCOL', 'http'),
-          'domain' => env('COSV3_DOMAIN'),
-          'app_id' => env('COSV3_APPID'),
-          'secret_id' => env('COSV3_SECRET_ID'),
-          'secret_key' => env('COSV3_SECRET_KEY'),
-          'timeout' => env('COSV3_PROTOCOL', 60),
-          'bucket' => env('COSV3_BUCKET'),
+  'disks' => [
+      'cosv4' => [
+          'driver' => 'cosv4',
+          'region' => env('COSV4_REGION', 'gz'),
+          'protocol' => env('COSV4_PROTOCOL', 'http'),
+          'domain' => env('COSV4_DOMAIN'),
+          'app_id' => env('COSV4_APP_ID'),
+          'secret_id' => env('COSV4_SECRET_ID'),
+          'secret_key' => env('COSV4_SECRET_KEY'),
+          'timeout' => env('COSV4_TIMEOUT', 60),
+          'bucket' => env('COSV4_BUCKET'),
       ],
   ],
   ```

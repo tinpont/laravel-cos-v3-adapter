@@ -1,6 +1,6 @@
 {
-    "name": "freyo/laravel-cos-v3-adapter",
-    "description": "Tencent Qcloud COS V3 Adapter for Laravel",
+    "name": "tinpont/laravel-cos-v4-adapter",
+    "description": "Tencent Qcloud COS V4 Adapter for Laravel",
     "keywords": ["cos", "qcloud", "laravel", "adapter"],
     "require": {
         "php": ">=5.5.0",
@@ -8,15 +8,15 @@
     },
     "autoload": {
         "psr-4": {
-            "Freyo\\LaravelQcloudCosV3\\": "src/"
+            "Tinpont\\LaravelQcloudCosV4\\": "src/"
         }
     },
     "license": "MIT",
     "minimum-stability" : "dev",
     "authors": [
         {
-            "name": "freyo",
-            "email": "freyhsiao@gmail.com"
+            "name": "tinpont",
+            "email": "admin@tinpont.com"
         }
     ]
 }

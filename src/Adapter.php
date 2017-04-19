@@ -1,9 +1,9 @@
 <?php
 
-namespace Freyo\LaravelQcloudCosV3;
+namespace Tinpont\LaravelQcloudCosV4;
 
-use Freyo\LaravelQcloudCosV3\Qcloud\Conf;
-use Freyo\LaravelQcloudCosV3\Qcloud\Cosapi;
+use Tinpont\LaravelQcloudCosV4\Qcloud\Conf;
+use Tinpont\LaravelQcloudCosV4\Qcloud\Cosapi;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Config;
 
@@ -32,6 +32,7 @@ class Adapter extends AbstractAdapter
 
         $this->setPathPrefix($config['protocol'].'://'.$config['domain'].'/');
 
+        Cosapi::setRegion($config['region']);
         Cosapi::setTimeout($config['timeout']);
     }
 
